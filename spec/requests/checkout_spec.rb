@@ -20,6 +20,8 @@ describe "Checkout", :js => true do
     @product.on_hand = 1
     @product.save
 
+    Spree::Config[:enable_mail_delivery] = true
+
     create(:payment_method, :environment => 'test')
     create(:product, :name => "RoR Mug")
     visit spree.root_path
@@ -87,37 +89,6 @@ describe "Checkout", :js => true do
       Spree::Order.count.should == 1
     end
 
-    # Regression test for #890
-    it "should associate an incomplete guest order with user after successful password reset" do
-      user = create(:user, :email => "email@person.com", :password => "password", :password_confirmation => "password")
-      click_link "RoR Mug"
-      click_button "Add To Cart"
-
-      visit spree.login_path
-      click_link "Forgot Password?"
-      fill_in "Email", :with => "email@person.com"
-      click_button "Reset my password"
-
-      user.reload
-
-      visit spree.edit_user_password_path(:reset_password_token => user.reset_password_token)
-      fill_in "Password", :with => "password"
-      fill_in "Password Confirmation", :with => "password"
-      click_button "Update my password and log me in"
-
-      click_link "Cart"
-      click_button "Checkout"
-      str_addr = "bill_address"
-      select "United States", :from => "order_#{str_addr}_attributes_country_id"
-      ['firstname', 'lastname', 'address1', 'city', 'zipcode', 'phone'].each do |field|
-        fill_in "order_#{str_addr}_attributes_#{field}", :with => "#{address.send(field)}"
-      end
-      select "#{address.state.name}", :from => "order_#{str_addr}_attributes_state_id"
-      check "order_use_billing"
-      click_button "Save and Continue"
-      page.should_not have_content("Email is invalid")
-    end
-
     it "should allow a user to register during checkout" do
       click_link "RoR Mug"
       click_button "Add To Cart"
@@ -156,9 +127,13 @@ describe "Checkout", :js => true do
       fill_in "Email", :with => "email@person.com"
       click_button "Reset my password"
 
-      user.reload
+      # Need to do this now because the token stored in the DB is the encrypted version
+      # The 'plain-text' version is sent in the email and there's one way to get that!
+      reset_password_email = ActionMailer::Base.deliveries.first
+      token_url_regex = /^http:\/\/example.com\/user\/spree_user\/password\/edit\?reset_password_token=(.*)$/
+      token = token_url_regex.match(reset_password_email.body.to_s)[1]
 
-      visit spree.edit_user_password_path(:reset_password_token => user.reset_password_token)
+      visit spree.edit_spree_user_password_path(:reset_password_token => token)
       fill_in "Password", :with => "password"
       fill_in "Password Confirmation", :with => "password"
       click_button "Update my password and log me in"

@@ -40,11 +40,6 @@ module Spree
       email =~ /@example.net$/ ? true : false
     end
 
-    def send_reset_password_instructions
-      generate_reset_password_token!
-      UserMailer.reset_password_instructions(self).deliver
-    end
-
     protected
       def password_required?
         !persisted? || password.present? || password_confirmation.present?
