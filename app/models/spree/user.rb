@@ -20,7 +20,7 @@ module Spree
     roles_table_name = Role.table_name
 
     scope :admin, lambda { includes(:spree_roles).where("#{roles_table_name}.name" => "admin") }
-    scope :registered, where("#{users_table_name}.email NOT LIKE ?", "%@example.net")
+    scope :registered, -> { where("#{users_table_name}.email NOT LIKE ?", "%@example.net") }
 
     class DestroyWithOrdersError < StandardError; end
 
