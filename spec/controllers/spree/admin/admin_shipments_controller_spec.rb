@@ -22,27 +22,27 @@ describe Spree::Admin::ShipmentsController do
 
     it 'should grant access to users with an admin role' do
       #user.stub :has_role? => true
-      user.spree_roles << Spree::Role.find_or_create_by_name('admin')
+      user.spree_roles << Spree::Role.find_or_create_by(name: 'admin')
       spree_get :index
       response.should render_template :index
     end
 
     it 'should grant access to users with an bar role' do
-      user.spree_roles << Spree::Role.find_or_create_by_name('bar')
+      user.spree_roles << Spree::Role.find_or_create_by(name: 'bar')
       Spree::Ability.register_ability(BarAbility)
       spree_get :index
       response.should render_template :index
     end
 
     it 'should grant access to users with an bar role' do
-      user.spree_roles << Spree::Role.find_or_create_by_name('bar')
+      user.spree_roles << Spree::Role.find_or_create_by(name: 'bar')
       Spree::Ability.register_ability(BarAbility)
       spree_get :edit, { :order_id => 'R123', :id => 9 }
       response.should_not render_template 'shared/unauthorized'
     end
 
     it 'should grant access to users with an bar role' do
-      user.spree_roles << Spree::Role.find_or_create_by_name('bar')
+      user.spree_roles << Spree::Role.find_or_create_by(name: 'bar')
       Spree::Ability.register_ability(BarAbility)
       spree_put :update, { :order_id => 'R123', :id => 9 }
       response.should_not render_template 'shared/unauthorized'
