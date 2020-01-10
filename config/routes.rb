@@ -12,13 +12,13 @@ Spree::Core::Engine.routes.prepend do
   resources :users, :only => [:edit, :update]
 
   devise_scope :user do
-    get '/login' => 'user_sessions#new', :as => :login
-    get '/logout' => 'user_sessions#destroy', :as => :logout
-    get '/signup' => 'user_registrations#new', :as => :signup
+    get '/login' => 'user_sessions#new'
+    get '/logout' => 'user_sessions#destroy'
+    get '/signup' => 'user_registrations#new'
   end
 
-  match '/checkout/registration' => 'checkout#registration', :via => :get, :as => :checkout_registration
-  match '/checkout/registration' => 'checkout#update_registration', :via => :put, :as => :update_checkout_registration
+  get '/checkout/registration' => 'checkout#registration'
+  put '/checkout/registration' => 'checkout#update_registration'
 
   match '/orders/:id/token/:token' => 'orders#show', :via => :get, :as => :token_order
 
